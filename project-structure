@@ -1,0 +1,12 @@
+mental-health-test/
+├── index.html
+├── css/
+│   └── style.css
+├── js/
+│   ├── lib/
+│   │   └── chart.umd.min.js
+│   ├── app.js
+│   ├── questions.js
+│   └── results.js
+└── assets/
+    └── images/ 

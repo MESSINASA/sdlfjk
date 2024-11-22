@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理健康评估中心</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="./js/chart-utils.js"></script>
+    <style>
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 1000px;
+            height: 100vh;
+            background: var(--white);
+            box-shadow: var(--shadow-2);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .admin-panel.active {
+            right: 0;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .close-admin {
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: var(--error-color);
+        }
+
+        .close-admin:hover {
+            transform: scale(1.2);
+        }
+
+        .admin-history-item {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: var(--background-light);
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .admin-chart {
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--background-light);
+            border-radius: 8px;
+        }
+
+        .admin-content {
+            padding: 20px;
+        }
+
+        .admin-history-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .admin-history-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .admin-history-list::-webkit-scrollbar-track {
+            background: var(--background-light);
+            border-radius: 4px;
+        }
+
+        .admin-history-list::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader"></div>
+        <p>加载中...</p>
+    </div>
+
+    <script>
+    // 添加加载状态控制
+    window.addEventListener('load', function() {
+        document.getElementById('loading-overlay').style.display = 'none';
+    });
+    </script>
+
+    <header class="main-header">
+        <div class="container">
+            <h1 class="site-title">心理健康评估中心</h1>
+            <p class="site-subtitle">专业的心理健康评估工具</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="theme-switch">
+            <button id="theme-toggle" aria-label="切换主题">
+                <i class="mode-icon"></i>
+            </button>
+        </div>
+
+        <!-- 首页界面 -->
+        <div id="home-screen" class="screen active">
+            <div class="dashboard">
+                <div class="dashboard-item">
+                    <h2>开始新测试</h2>
+                    <p>进行心理健康评估测试</p>
+                    <button onclick="startNewTest()" class="primary-button">开始测试</button>
+                </div>
+
+                <div class="dashboard-item">
+                    <h2>历史记录</h2>
+                    <div id="history-list" class="history-list">
+                        <!-- 历史记录将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+
+                <div class="dashboard-item">
+                    <h2>趋势分析</h2>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="dashboard-item">
+                    <h2>心理热闻</h2>
+                    <div class="news-list">
+                        <a href="http://www.xinli110.com/news/latest" 
+                           target="_blank" 
+                           class="news-item">
+                            <span class="news-date">2023-11-20</span>
+                            <h3>大学生心理健康：如何应对期末考试压力</h3>
+                            <p>专家分享科学的压力管理方法，帮助学生平稳度过考试季...</p>
+                        </a>
+                        <a href="http://www.xinli110.com/news/latest" 
+                           target="_blank" 
+                           class="news-item">
+                            <span class="news-date">2023-11-18</span>
+                            <h3>睡眠质量与心理健康的关系研究</h3>
+                            <p>最新研究发现：良好的睡眠习惯对心理健康的重要影响...</p>
+                        </a>
+                        <a href="http://www.xinli110.com/news/latest" 
+                           target="_blank" 
+                           class="news-item">
+                            <span class="news-date">2023-11-15</span>
+                            <h3>社交媒体对青少年心理的影响</h3>
+                            <p>如何在数字时代保持健康的社交媒体使用习惯...</p>
+                        </a>
+                        <a href="http://www.xinli110.com/news/latest" 
+                           target="_blank" 
+                           class="news-item">
+                            <span class="news-date">2023-11-13</span>
+                            <h3>冬季心理调适指南</h3>
+                            <p>专业心理咨询师教你如何应对冬季情绪波动，保持积极心态...</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试界面 -->
+        <div id="test-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+            <div class="question-container">
+                <h3 id="question-text"></h3>
+                <div id="options-container" class="options">
+                    <!-- 选项将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果界面 -->
+        <div id="result-screen" class="screen">
+            <h2>测试结果</h2>
+            <div id="result-container">
+                <!-- 结果将通过JavaScript动态添加 -->
+            </div>
+            <div class="notes-section">
+                <h3>添加笔记</h3>
+                <textarea id="result-notes" placeholder="在这里添加你的想法和感受..."></textarea>
+            </div>
+            <div class="actions">
+                <button onclick="returnToHome()">返回首页</button>
+                <button onclick="retakeTest()">重新测试</button>
+                <button onclick="showRecommendations()">查看建议</button>
+                <button onclick="exportResult()">导出结果</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>注意：本测试仅供参考，如有严重心理问题请及时咨询专业心理医生</p>
+            <p>全国24小时心理危机干预热线：</p>
+            <div class="hotlines">
+                <p>北京：010-82951332</p>
+                <p>上海：021-12320-5</p>
+                <p>深圳：0755-25629459</p>
+                <p>全国统一求助热线：96111</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="./js/questions.js"></script>
+    <script src="./js/results.js"></script>
+    <script src="./js/news.js"></script>
+    <script src="./js/theme.js"></script>
+    <script src="./js/admin.js"></script>
+</body>
+</html> 
